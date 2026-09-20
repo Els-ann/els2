@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#B5603C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Els">
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<title>Els</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Newsreader:opsz,wght@6..72,400;6..72,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F1EA; --panel:#FFFFFF; --ink:#22302E; --soft:#5C7370; --faint:#8DA19D;
+  --brand:#B5603C; --brand-ink:#FFFFFF; --sea:#2F6E7A; --leaf:#5F7F4E; --gold:#D9B36A;
+  --line:#E0DACD; --warn:#A34A2C; --stop:#B5463B; --tint:#EDE6D8;
+  --serif:"Newsreader", Georgia, serif;
+  --sans:"Atkinson Hyperlegible", -apple-system, system-ui, "Segoe UI", Arial, sans-serif;
+  --shadow:0 2px 10px rgba(40,30,20,.07);
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#171E1D; --panel:#202A29; --ink:#E9EFEC; --soft:#9CB2AE; --faint:#748A86;
+  --brand:#D9805A; --brand-ink:#1A1412; --sea:#63A9B4; --leaf:#8DB07A; --gold:#D9B36A;
+  --line:#2F3D3B; --warn:#E39A7C; --stop:#D8695C; --tint:#26302E; --shadow:none;
+}}
+*,*::before,*::after{box-sizing:inherit}
+html{min-height:100%}
+body{margin:0;min-height:100vh;min-height:100dvh;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:18px;line-height:1.45;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
+button:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.hidden{display:none!important}
+.app{min-height:100vh;min-height:100dvh;max-width:560px;margin:0 auto;display:flex;flex-direction:column;padding:6px 16px 12px}
+
+/* top bar */
+.bar{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:46px;flex:0 0 auto}
+.langs{display:flex;gap:6px}
+.lang{border:1.5px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 12px;font-size:15px}
+.lang[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.icon{padding:8px;color:var(--soft)}
+.icon svg{width:24px;height:24px;display:block}
+
+/* stage */
+.stage{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;gap:10px;overflow-y:auto}
+.portrait{position:relative;width:min(62vw,270px);aspect-ratio:380/440;transition:width .4s ease;padding:0;border-radius:36px}
+.app.incall .portrait{width:min(80vw,340px,calc((100dvh - 320px) * 380 / 440))}
+.portrait svg.els{width:100%;height:100%;display:block;border-radius:36px;box-shadow:var(--shadow)}
+.timering{position:absolute;inset:-10px;width:calc(100% + 20px);height:calc(100% + 20px);pointer-events:none;opacity:0;transition:opacity .3s}
+.app.incall .timering{opacity:1}
+.timering rect{fill:none;stroke-width:4;rx:44}
+.status{font-size:17px;color:var(--soft);min-height:1.4em;text-align:center}
+.caption{font-family:var(--serif);font-size:21px;line-height:1.35;text-align:center;max-width:32ch;min-height:2.6em}
+
+/* home */
+.home{display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center;width:100%}
+.hello{font-family:var(--serif);font-weight:400;font-size:31px;line-height:1.15;margin:0}
+.sub{margin:0;color:var(--soft);max-width:32ch;font-size:17px}
+.big{border-radius:999px;background:var(--brand);color:var(--brand-ink);font-weight:700;font-size:20px;padding:16px 28px;min-width:240px;box-shadow:var(--shadow)}
+.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chip{border:1.5px solid var(--line);background:var(--panel);border-radius:999px;padding:10px 16px;font-size:16px;display:flex;align-items:center;gap:7px}
+.chip svg{width:19px;height:19px}
+.chip .dot{background:var(--brand);color:var(--brand-ink);border-radius:999px;font-size:13px;padding:1px 7px;font-weight:700}
+.stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:2px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:9px 14px;min-width:92px}
+.stat b{display:block;font-size:22px;font-family:var(--serif)}
+.stat span{font-size:13px;color:var(--soft)}
+.note{font-size:16px;color:var(--soft);text-align:center;max-width:32ch}
+.note.err{color:var(--warn)}
+
+/* call bar */
+.callbar{flex:0 0 auto;display:flex;justify-content:center;align-items:flex-start;gap:30px;padding-top:6px}
+.round{width:70px;height:70px;border-radius:50%;display:grid;place-items:center;background:var(--panel);border:1.5px solid var(--line)}
+.round svg{width:30px;height:30px}
+.round.stop{background:var(--stop);color:#fff;border:0;width:80px;height:80px}
+.round[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.cap{font-size:13px;color:var(--soft);text-align:center;margin-top:4px}
+
+/* sheet */
+.sheet{position:fixed;inset:0;background:rgba(15,25,23,.5);display:none;z-index:10}
+.sheet.show{display:block}
+.card{position:absolute;inset:0;margin:0 auto;background:var(--bg);width:100%;max-width:560px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:0 18px calc(40px + env(safe-area-inset-bottom,0px))}
+.cardtop{position:sticky;top:0;background:var(--bg);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:calc(14px + env(safe-area-inset-top,0px)) 0 10px;border-bottom:1px solid var(--line);margin-bottom:14px;z-index:2}
+.card h2{font-family:var(--serif);font-weight:600;font-size:26px;line-height:1.15;margin:0}
+.card h3{font-size:17px;margin:22px 0 8px;color:var(--soft);font-weight:700}
+.close{font-size:32px;line-height:1;padding:0 6px;color:var(--soft)}
+.card p{margin:0 0 12px}
+.block{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:0 0 10px}
+.block .t{font-family:var(--serif);font-size:19px}
+.block .n{color:var(--soft);font-size:15px;margin-top:3px}
+.reading{font-family:var(--serif);font-size:19px;line-height:1.55;background:var(--tint);border-radius:16px;padding:14px 16px;margin-bottom:14px}
+.fixline s{color:var(--warn)} .fixline b{color:var(--ink)}
+.q{margin:16px 0 8px;font-weight:700}
+.opt{display:block;width:100%;text-align:left;border:1.5px solid var(--line);background:var(--panel);border-radius:14px;padding:11px 14px;margin:0 0 8px;font-size:17px}
+.opt.right{border-color:var(--leaf);background:rgba(95,127,78,.15)}
+.opt.wrong{border-color:var(--warn)}
+.why2{color:var(--soft);font-size:15px;margin:0 0 6px}
+.actions{display:flex;flex-direction:column;gap:10px;margin-top:20px;align-items:center}
+label{display:block;font-weight:700;margin:16px 0 6px}
+.hint{font-size:15px;color:var(--soft);margin:0 0 6px}
+textarea,select{width:100%;font:inherit;font-size:17px;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--panel);color:var(--ink)}
+.check{display:flex;gap:10px;align-items:center;margin-top:14px;font-weight:700}
+.check input{width:22px;height:22px}
+.bars{display:flex;align-items:flex-end;gap:8px;height:96px;padding:6px 0}
+.bars div{flex:1;background:var(--tint);border-radius:8px 8px 4px 4px;position:relative;min-height:4px}
+.bars div.on{background:var(--brand)}
+.barlab{display:flex;gap:8px;font-size:13px;color:var(--faint);text-align:center}
+.barlab span{flex:1}
+.pill{display:inline-block;background:var(--tint);border-radius:999px;padding:3px 10px;font-size:14px;color:var(--soft);margin:0 6px 6px 0}
+a{color:var(--sea)}
+</style>
+</head>
+<body>
+<div id="crash" style="display:none;position:fixed;left:0;right:0;top:0;z-index:99;background:#7A2E20;color:#fff;padding:14px 16px calc(14px + env(safe-area-inset-top,0px));font:15px/1.4 -apple-system,system-ui,Arial,sans-serif">
+  <b>Er ging iets mis bij het openen.</b>
+  <div id="crashmsg" style="margin:6px 0 10px;word-break:break-word;opacity:.9"></div>
+  <button id="crashfix" style="font:inherit;background:#fff;color:#7A2E20;border:0;border-radius:999px;padding:9px 16px;font-weight:700">App opnieuw laden</button>
+</div>
+<script>
+(function(){
+  function show(m){
+    var c = document.getElementById("crash");
+    if(!c) return;
+    c.style.display = "block";
+    document.getElementById("crashmsg").textContent = String(m).slice(0, 300);
+  }
+  window.addEventListener("error", function(e){ show((e.message||"fout") + (e.lineno ? " (regel " + e.lineno + ")" : "")); });
+  window.addEventListener("unhandledrejection", function(e){ show(e.reason && e.reason.message || e.reason || "fout"); });
+  document.addEventListener("DOMContentLoaded", function(){
+    var b = document.getElementById("crashfix");
+    if(b) b.onclick = function(){
+      try{ if(window.caches) caches.keys().then(function(ks){ ks.forEach(function(k){ caches.delete(k); }); }); }catch(err){}
+      try{ if(navigator.serviceWorker) navigator.serviceWorker.getRegistrations().then(function(rs){ rs.forEach(function(r){ r.unregister(); }); }); }catch(err){}
+      setTimeout(function(){ location.reload(true); }, 400);
+    };
+  });
+})();
+</script>
+<div class="app" id="app">
+  <div class="bar">
+    <div class="langs" id="langs" role="group" aria-label="Taal"></div>
+    <div class="clock hidden" id="clock" style="font-size:15px;color:var(--soft)"></div>
+    <button class="icon" id="gear" aria-label="Instellingen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  </div>
+  <main class="stage">
+    <button class="portrait" id="portrait" aria-label="Els">
+      <svg class="timering" viewBox="0 0 400 460" aria-hidden="true"><rect id="ringbg" x="4" y="4" width="392" height="452" rx="44" stroke="var(--line)"/><rect id="ring" x="4" y="4" width="392" height="452" rx="44" stroke="var(--brand)" stroke-linecap="round"/></svg>
+      <svg class="els" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 440" role="img" aria-label="Els">
+<defs><clipPath id="card"><rect width="380" height="440" rx="36"/></clipPath></defs>
+<g clip-path="url(#card)">
+<rect width="380" height="440" fill="#EAE5DC"/>
+<circle cx="190" cy="232" r="150" fill="#DFE3D8"/>
+<circle cx="190" cy="232" r="150" fill="none" stroke="#C6B9A2" stroke-width="1.2"/>
+<path d="M0 360 Q95 344 190 360 T380 360 V440 H0Z" fill="#D9D2C5"/>
+<g id="body">
+  <path d="M164 250 q26 20 52 0 l4 46 q-30 14 -60 0Z" fill="#E3B591"/>
+  <path d="M167 266 q23 17 46 0 l2 24 q-25 12 -50 0Z" fill="#D9A886"/>
+  <path d="M44 440 Q50 330 146 302 L190 336 L234 302 Q330 330 336 440Z" fill="#B5603C"/>
+  <path d="M150 300 Q170 332 190 338 L176 366 Q152 334 142 304Z" fill="#C67552"/>
+  <path d="M230 300 Q210 332 190 338 L204 366 Q228 334 238 304Z" fill="#C67552"/>
+  <path d="M146 302 Q190 356 234 302 L226 300 Q190 344 154 300Z" fill="#94482C"/>
+  <path d="M134 284 Q190 318 246 284 q24 14 20 46 q-76 42 -152 0 q-4 -32 20 -46Z" fill="#D9B36A"/><path d="M150 310 q40 18 80 0" stroke="#C69B4E" stroke-width="2" fill="none" opacity=".8"/><path d="M232 320 q18 28 10 64 q-15 -4 -17 -24Z" fill="#C99F52"/>
+  <path d="M96 440 q6 -56 22 -88" stroke="#94482C" stroke-width="2" fill="none"/>
+  <path d="M284 440 q-6 -56 -22 -88" stroke="#94482C" stroke-width="2" fill="none"/>
+</g>
+<g id="hand">
+  <path d="M96 440 q4 -44 34 -58 l30 10 q-14 30 -12 48Z" fill="#B5603C"/>
+  <ellipse cx="146" cy="392" rx="9" ry="30" transform="rotate(24 146 392)" fill="#B5603C"/>
+  <path d="M118 368 q30 -14 52 4 q6 20 -12 28 q-28 10 -44 -8Z" fill="#F0CBAA"/>
+  <path d="M126 360 q14 -10 28 -4 M132 354 q12 -8 24 -3" stroke="#E3B591" stroke-width="7" stroke-linecap="round" fill="none"/>
+  <path d="M154 342 h44 q6 0 6 8 l-4 26 q-1 8 -9 8 h-30 q-8 0 -9 -8 l-4 -26 q0 -8 6 -8Z" fill="#FBF8F3"/>
+  <path d="M154 342 h50 l-1 8 h-48Z" fill="#E9E2D5"/>
+  <path d="M204 350 q14 2 12 14 q-2 10 -14 10" stroke="#FBF8F3" stroke-width="6" fill="none"/>
+  <path d="M170 330 q-4 -8 0 -14 M184 330 q-4 -8 0 -14" stroke="#FFFFFF" stroke-width="2" opacity=".6" fill="none" stroke-linecap="round"/>
+  <circle cx="163" cy="372" r="2.6" fill="#D8C08A"/>
+</g>
+<g id="headAll">
+  <path d="M112 188 Q108 94 190 86 Q272 94 268 188 q2 30 -6 48 q-6 -10 -8 -26 L120 236 q-8 -18 -8 -48Z" fill="#6B4528"/><ellipse cx="126.0" cy="250" rx="19.0" ry="15" transform="rotate(-6 126.0 250)" fill="#7A5230"/><ellipse cx="124.5" cy="274" rx="17.8" ry="15" transform="rotate(-7 124.5 274)" fill="#8E6540"/><ellipse cx="123.0" cy="298" rx="16.6" ry="15" transform="rotate(-8 123.0 298)" fill="#7A5230"/><ellipse cx="121.5" cy="322" rx="15.4" ry="15" transform="rotate(-9 121.5 322)" fill="#8E6540"/><ellipse cx="120.0" cy="346" rx="14.2" ry="15" transform="rotate(-10 120.0 346)" fill="#7A5230"/><path d="M112 364 q10 10 22 6 q-6 16 -20 12 q-6 -8 -2 -18Z" fill="#6B4528"/><path d="M106 352 q14 10 30 4" stroke="#D9B36A" stroke-width="5" fill="none" stroke-linecap="round"/>
+  
+  
+  <ellipse cx="118" cy="190" rx="12" ry="19" fill="#E8C0A0"/>
+  <ellipse cx="262" cy="190" rx="12" ry="19" fill="#E8C0A0"/>
+  <g id="earL"></g>
+  <g id="earR"></g>
+  <path d="M190 86 q-80 4 -78 102 q0 32 8 52 q-6 -58 14 -84 q32 10 56 -10 q24 22 60 18 q14 24 14 76 q12 -28 10 -66 q-2 -88 -84 -88Z" fill="#7A5230"/>
+  <ellipse cx="190" cy="186" rx="68" ry="88" fill="#F0CBAA"/>
+  <path d="M132 208 q10 30 28 44 M248 208 q-10 30 -28 44" stroke="#E5B694" stroke-width="6" fill="none" opacity=".5"/>
+  <ellipse cx="150" cy="212" rx="16" ry="9" fill="#E79C8A" opacity=".17"/>
+  <ellipse cx="230" cy="212" rx="16" ry="9" fill="#E79C8A" opacity=".17"/>
+  <path d="M114 176 C118 108 152 86 190 86 C230 86 266 110 266 176 C256 134 230 118 190 118 C150 118 124 136 114 176Z" fill="#8E6540"/><path d="M170 96 C140 108 124 134 120 162 C132 132 150 112 176 104Z" fill="#AD8258" opacity=".45"/>
+  
+  <g id="brows">
+    <path d="M146 158 q18 -11 36 -3" stroke="#5E3E24" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M198 155 q18 -8 36 3" stroke="#5E3E24" stroke-width="4" fill="none" stroke-linecap="round"/>
+  </g>
+  <path d="M146 182 q16 -12 32 0 q-16 12 -32 0Z" fill="#FBF6EF"/>
+  <path d="M202 182 q16 -12 32 0 q-16 12 -32 0Z" fill="#FBF6EF"/>
+  <g id="pupils">
+    <circle cx="162" cy="182" r="7.5" fill="#6B4A2A"/><circle cx="218" cy="182" r="7.5" fill="#6B4A2A"/>
+    <circle cx="162" cy="182" r="3.4" fill="#2A1C12"/><circle cx="218" cy="182" r="3.4" fill="#2A1C12"/>
+    <circle cx="164.6" cy="179" r="2.2" fill="#fff"/><circle cx="220.6" cy="179" r="2.2" fill="#fff"/>
+  </g>
+  <path d="M146 182 q16 -13 32 -1" stroke="#3A2416" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  <path d="M202 181 q16 -12 32 1" stroke="#3A2416" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  <path d="M146 181 q-5 -2 -7 -5 M234 181 q5 -2 7 -5" stroke="#3A2416" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <g id="lids" style="transform-origin:190px 170px;transform:scaleY(0)"><path d="M144 170 h36 v16 h-36Z" fill="#F0CBAA"/><path d="M200 170 h36 v16 h-36Z" fill="#F0CBAA"/></g>
+  <path d="M190 190 q-5 22 -10 28 q9 6 20 1" stroke="#DFAC88" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  
+  <g id="smile">
+    <path d="M166 232 q24 16 48 0 q-24 10 -48 0Z" fill="#B9645F"/>
+    <path d="M166 232 q24 -8 48 0 q-24 -12 -48 0Z" fill="#C97772"/>
+    <path d="M172 234 q18 8 36 0" stroke="#FFF9F2" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  </g>
+  <g id="mouth" opacity="0">
+    <ellipse id="mouthIn" cx="190" cy="236" rx="19" ry="3" fill="#5A2029" stroke="#B9645F" stroke-width="4" />
+    <rect id="teeth" x="176" y="231" width="28" height="4" rx="2" fill="#FFF9F2"/>
+    <ellipse id="tongue" cx="190" cy="242" rx="8" ry="3" fill="#C4696B" opacity="0"/>
+  </g>
+  <path d="M160 228 q4 4 6 4 M220 228 q-4 4 -6 4" stroke="#DFAC88" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+</g>
+</g>
+</svg>
+
+    </button>
+    <div class="status" id="status" aria-live="polite"></div>
+    <div class="caption hidden" id="caption" aria-live="polite"></div>
+    <div class="home" id="home"></div>
+  </main>
+  <nav class="callbar hidden" id="callbar">
+    <div><button class="round" id="muteBtn" aria-pressed="false" aria-label="Microfoon uit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><div class="cap" id="muteCap">Micro aan</div></div>
+    <div><button class="round stop" id="stopBtn" aria-label="Gesprek stoppen"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2.5"/></svg></button><div class="cap">Stoppen</div></div>
+    <div><button class="round" id="subBtn" aria-pressed="true" aria-label="Ondertitels"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 14h4M13 14h4M7 10h10"/></svg></button><div class="cap">Tekst</div></div>
+  </nav>
+</div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="card" id="card"></div></div>
+<script>
+"use strict";
+/* ========== config ========== */
+const LIVE_MODELS = ["gemini-3.8-live", "gemini-3.1-flash-live-preview", "gemini-2.5-flash-native-audio-preview-12-2025"];
+const TEXT_FAST = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-2.5-flash-lite"];
+const TEXT_SMART = ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-2.5-flash"];
+const WS_URL = "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=";
+const REST = "https://generativelanguage.googleapis.com/v1beta/models/";
+const PROFILE = new TextDecoder().decode(Uint8Array.from(atob("QW5uIGlzIDU1IGFuZCBGbGVtaXNoOyBEdXRjaCBpcyBoZXIgbW90aGVyIHRvbmd1ZS4gU2hlIGxpdmVzIGluIEJvb20sIG5lYXIgQW50d2VycCwgYW5kIGhhcyB0YXVnaHQgZm9yIG1hbnkgeWVhcnMgYXQgYSBzY2hvb2wgaW4gdGhlIGNlbnRyZSBvZiBBbnR3ZXJwLgpTaGUgaXMgbWFycmllZCBhbmQgaGFzIGZvdXIgYWR1bHQgY2hpbGRyZW46IENhcm9saW5hLCBKb25hdGhhbiwgQ2F0aGVyaW5lIGFuZCBPbGl2ZXIuIFR3byBvZiB0aGVtIGFyZSB0d2lucywgYSBib3kgYW5kIGEgZ2lybC4gVGhlIGVsZGVzdCBpcyAyNyBhbmQgaXMgYWJvdXQgdG8gbGVhdmUgZm9yIGEgc2FiYmF0aWNhbCB5ZWFyIGluIEFzaWEuIEhlciBwYXJlbnRzIGFyZSBhbGl2ZSBhbmQgc2hlIGhhcyBicm90aGVycyBhbmQgc2lzdGVycy4KU2hlIGxvdmVzIHlvZ2EsIGhlYWx0aHkgZm9vZCBhbmQgZ29pbmcgdG8gdGhlIGd5bS4gU2hlIGxvdmVzIG5hdHVyZSwgdGhlIHNlYSBhbmQgYW55dGhpbmcgdG8gZG8gd2l0aCB3YXRlci4gU2hlIGhhcyBhIGJlYXV0aWZ1bCBnYXJkZW4gYW5kIGxvdmVzIHBsYW50cy4gU2hlIGVuam95cyBjeWNsaW5nIHRocm91Z2ggdGhlIGNpdHksIGludGVyaW9yIGRlc2lnbiBhbmQgYSBuaWNlIGF0bW9zcGhlcmUsIGdvb2QgTmV0ZmxpeCBzZXJpZXMsIHF1YWxpdHkgdGltZSwgYW5kIGRpc2NvdmVyaW5nIGJlYXV0aWZ1bCBuZXcgcGxhY2VzIHRvIHJlY29ubmVjdCB3aXRoIGhlcnNlbGYgYW5kIHNoYXJlIHdpdGggb3RoZXJzLgpTaGUgdmFsdWVzIGZlZWxpbmdzIGFuZCBjb25uZWN0aW9uIG1vcmUgdGhhbiBtYXRlcmlhbCB0aGluZ3MsIGFuZCBsaWtlcyBnaXZpbmcgbW9yZSB0aGFuIHJlY2VpdmluZy4gU2hlIGhhcyBhIGJpZyBoZWFydCBhbmQgbGlrZXMgcGVvcGxlIHNoZSByZWFsbHkgY29ubmVjdHMgd2l0aC4gU2hlIHdlYXJzIGdsYXNzZXMuClNoZSB3YW50cyB0byBzcGVhayBFbmdsaXNoIG1vcmUgZmx1ZW50bHkgYW5kIHdpdGggZmV3ZXIgbWlzdGFrZXMsIGZvciBoZXJzZWxmIGFuZCBmb3IgaGVyIHdvcmsu"), c => c.charCodeAt(0)));
+const VOICES = {
+  "gb-warm":{voice:"Despina",accent:"British",label:"Brits · warm"},
+  "gb-zacht":{voice:"Vindemiatrix",accent:"British",label:"Brits · zacht"},
+  "gb-helder":{voice:"Kore",accent:"British",label:"Brits · helder"},
+  "us-warm":{voice:"Sulafat",accent:"American",label:"Amerikaans · warm"},
+  "us-rijp":{voice:"Gacrux",accent:"American",label:"Amerikaans · rijp"},
+  "us-fris":{voice:"Aoede",accent:"American",label:"Amerikaans · fris"}
+};
+const LANGS = {
+  en:{label:"EN",name:"English",code:"en-GB",ui:"Engels",level:"Intermediate (B1-B2). She speaks quite fluently but makes grammar mistakes: tenses, prepositions, word order, false friends from Dutch."},
+  fr:{label:"FR",name:"French",code:"fr-FR",ui:"Frans",level:"Intermediate (B1). Speaks more than she writes; weaker on genders, tenses, agreement."},
+  de:{label:"DE",name:"German",code:"de-DE",ui:"Duits",level:"Basic (A2). Short, simple sentences and everyday words; speak slowly and clearly."},
+  nl:{label:"NL",name:"Dutch",code:"nl-BE",ui:"Nederlands",level:"Native speaker. Chat freely and richly."}
+};
+const SESSION_MIN = 10;
+
+const ELS = `You are Els, a Belgian woman of about 55 and Ann's language companion: almost a best friend, and a language coach.
+
+WHO YOU ARE
+- Flemish, grew up near Ghent, lived and worked abroad for years (London, Lyon, Berlin), so you speak English, French and German well.
+- Warm, direct and down-to-earth, with a dry Belgian sense of humour. You put things in perspective; nothing surprises you. You have lived a full life and share small, believable stories and opinions of your own, like a real friend. You give honest advice when it helps.
+- You are curious about Ann and you listen more than you lecture. Never sound like a teacher or a textbook.
+
+CORRECTIONS: ALWAYS SPOKEN, NEVER WRITTEN
+- Ann sees no written corrections. Every correction happens out loud, inside the conversation.
+- When she makes a mistake that matters: react to what she said first, then correct briefly and kindly, for example "Oh, small thing: we say 'I have lived here for twenty years'. Try it?" Now and then let her repeat it and praise her warmly when she gets it.
+- One correction at a time, the one that matters most for sounding natural. If she is sharing something emotional, let small mistakes go.
+- Speak ONLY the practice language, also when correcting. If she is stuck and uses a Dutch word, give her the right word and let her use it.
+
+HOW YOU TALK
+- This is a real-time voice call. Short turns (1 to 3 sentences), spoken and natural, relaxed and clear.
+- Usually end with a question that keeps her talking about her life, her day, her feelings, her plans.
+- Teach one useful word or expression now and then, and use it again later in the conversation so it sticks.
+- Messages in square brackets starting with [App] come from the app, not from Ann: follow them silently, never read them aloud or mention them.
+- If what you hear is unclear or cut off, don't guess: ask her kindly to say it again.`;
+
+/* ========== storage ========== */
+const store = {
+  get(k,d){ try{ const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+};
+const dayKey = (d=new Date()) => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const todayNum = () => Math.floor(Date.now()/86400000);
+let lang = store.get("els:lang","en");
+if(!VOICES[store.get("els:voice2","")]) store.set("els:voice2","gb-warm");
+const $ = id => document.getElementById(id);
+const app = $("app");
+const el = (t,c,x) => { const e = document.createElement(t); if(c) e.className = c; if(x != null) e.textContent = x; return e; };
+const apiKey = () => store.get("els:key","");
+
+/* items = spaced repetition of her own mistakes and new words */
+const ITEMS = () => store.get("els:items",[]);
+const saveItems = a => store.set("els:items", a.slice(-400));
+const STEPS = [1,2,4,8,16,32];
+function addItem(type,a,b,extra){
+  if(!a || !b) return;
+  const items = ITEMS();
+  const key = (a+"|"+b).toLowerCase();
+  if(items.some(i => i.lang === lang && (i.a+"|"+i.b).toLowerCase() === key)) return;
+  items.push({type, lang, a:String(a).slice(0,120), b:String(b).slice(0,160), why:(extra||"").slice(0,160), reps:0, due:todayNum()+1, made:todayNum()});
+  saveItems(items);
+}
+function dueItems(n){ return ITEMS().filter(i => i.lang === lang && i.due <= todayNum()).slice(0,n); }
+function reviewed(item, ok){
+  const items = ITEMS(); const i = items.findIndex(x => x.a === item.a && x.b === item.b && x.lang === item.lang);
+  if(i < 0) return;
+  items[i].reps = ok ? Math.min(STEPS.length-1, items[i].reps+1) : 0;
+  items[i].due = todayNum() + STEPS[items[i].reps];
+  saveItems(items);
+}
+function logSession(min){
+  const log = store.get("els:log",{}); const k = dayKey();
+  log[k] = {min:Math.round((log[k]?.min || 0) + min)};
+  const keys = Object.keys(log).sort().slice(-120); const out = {}; keys.forEach(k2 => out[k2] = log[k2]);
+  store.set("els:log", out);
+}
+function streak(){ const log = store.get("els:log",{}); let n = 0; const d = new Date(); while(log[dayKey(d)]){ n++; d.setDate(d.getDate()-1); } return n; }
+function totalMin(){ const log = store.get("els:log",{}); return Object.values(log).reduce((s,v) => s + (v.min||0), 0); }
+
+/* ========== avatar animation ========== */
+const FF = id => $(id) || {setAttribute(){}, style:{}};
+const F = {headAll:FF("headAll"),body:FF("body"),hand:FF("hand"),pupils:FF("pupils"),brows:FF("brows"),lids:FF("lids"),mouth:FF("mouth"),mouthIn:FF("mouthIn"),teeth:FF("teeth"),tongue:FF("tongue"),smile:FF("smile"),earL:FF("earL"),earR:FF("earR")};
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let mode = "idle", level = 0, levelS = 0, mouthS = 0, nodT = 0, nod = 0, gaze = {x:0,y:0}, gazeT = {x:0,y:0}, nextGaze = 0, brow = 0, handS = 0, blinkT = 2;
+function animate(ts){
+  try{ frame(ts); }catch(e){}
+  requestAnimationFrame(animate);
+}
+function frame(ts){
+  const t = ts/1000; levelS += (level - levelS)*0.35;
+  const talking = mode === "speaking";
+  const target = talking ? Math.min(1, levelS*1.15) : 0;
+  mouthS += (target - mouthS)*0.55;
+  if(mouthS < 0.04){ F.mouth.setAttribute("opacity",0); F.smile.setAttribute("opacity",1); }
+  else{
+    F.mouth.setAttribute("opacity",1); F.smile.setAttribute("opacity",0);
+    const ry = 3 + mouthS*13;
+    F.mouthIn.setAttribute("ry",ry.toFixed(2)); F.mouthIn.setAttribute("rx",(20 - mouthS*3 + Math.sin(t*9)*1.2*mouthS).toFixed(2));
+    F.teeth.setAttribute("y",(238-ry+2).toFixed(2)); F.teeth.setAttribute("opacity", mouthS > .2 ? 1 : 0);
+    F.tongue.setAttribute("opacity", mouthS > .45 ? .9 : 0); F.tongue.setAttribute("cy",(238+ry*0.45).toFixed(2));
+  }
+  if(!reduceMotion){
+    const br = Math.sin(t*1.6)*1.4;
+    F.body.setAttribute("transform",`translate(0 ${br.toFixed(2)})`);
+    let rot = Math.sin(t*0.55)*1.6, dy = br*0.8;
+    if(mode === "listening"){ rot += 3.5; if(t > nodT){ nod = 1; nodT = t + 3 + Math.random()*3; } }
+    if(talking){ rot += Math.sin(t*1.9)*2.2 + levelS*2; dy += -levelS*2.5; if(levelS > .55 && t > nodT){ nod = .7; nodT = t + 1.2 + Math.random(); } }
+    nod *= 0.9; dy += Math.sin(nod*Math.PI)*4*nod;
+    F.headAll.setAttribute("transform",`translate(0 ${dy.toFixed(2)}) rotate(${rot.toFixed(2)} 190 270)`);
+    F.earL.setAttribute("transform",`rotate(${(-rot*2).toFixed(2)} 106 212)`); F.earR.setAttribute("transform",`rotate(${(-rot*2).toFixed(2)} 274 212)`);
+    if(t > nextGaze){ nextGaze = t + 1.8 + Math.random()*2.8; gazeT = mode === "listening" ? {x:0,y:0} : {x:(Math.random()-.5)*6,y:(Math.random()-.5)*3}; }
+    gaze.x += (gazeT.x-gaze.x)*0.12; gaze.y += (gazeT.y-gaze.y)*0.12;
+    F.pupils.setAttribute("transform",`translate(${gaze.x.toFixed(2)} ${gaze.y.toFixed(2)})`);
+    const bT = (talking && levelS > .6 ? -4 : 0) + (mode === "listening" ? -2 : 0);
+    brow += (bT-brow)*0.15; F.brows.setAttribute("transform",`translate(0 ${brow.toFixed(2)})`);
+    const hT = talking ? -10 - levelS*12 + Math.sin(t*2.3)*4 : Math.sin(t*0.7)*2;
+    handS += (hT-handS)*0.08;
+    F.hand.setAttribute("transform",`translate(0 ${handS.toFixed(2)}) rotate(${(talking?Math.sin(t*1.7)*4:0).toFixed(2)} 116 400)`);
+  }
+  blinkT -= 1/60;
+  if(blinkT <= 0){ F.lids.style.transform = "scaleY(1)"; setTimeout(() => F.lids.style.transform = "scaleY(0)", 120); blinkT = 2.5 + Math.random()*3.5; }
+}
+F.lids.style.transition = "transform 90ms ease";
+requestAnimationFrame(animate);
+function setState(s,text){ mode = s || "idle"; $("status").textContent = text || ""; }
+
+/* timer ring */
+const RING = FF("ring"), RINGLEN = 2*(392+452) - 8*44 + 2*Math.PI*44;
+RING.style.strokeDasharray = RINGLEN; RING.style.strokeDashoffset = RINGLEN;
+function setRing(p){ RING.style.strokeDashoffset = RINGLEN*(1 - Math.max(0, Math.min(1, p))); }
+
+/* ========== text model ========== */
+async function textJSON(prompt, models){
+  let lastErr = "network";
+  for(const m of models){
+    try{
+      const r = await fetch(REST + m + ":generateContent?key=" + encodeURIComponent(apiKey()), {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({contents:[{role:"user",parts:[{text:prompt}]}], generationConfig:{responseMimeType:"application/json", temperature:0.7}})
+      });
+      if(r.status === 404 || r.status === 400){ lastErr = "model"; continue; }
+      if(r.status === 429) throw {code:"quota"};
+      if(r.status === 401 || r.status === 403) throw {code:"key"};
+      if(!r.ok){ lastErr = "server"; continue; }
+      const j = await r.json();
+      const t = (j.candidates?.[0]?.content?.parts || []).map(p => p.text || "").join("").replace(/```json|```/g,"").trim();
+      return JSON.parse(t.slice(t.search(/[\[{]/)));
+    }catch(e){ if(e && e.code) throw e; lastErr = "parse"; }
+  }
+  throw {code:lastErr};
+}
+const errText = e => e && e.code === "key" ? "De sleutel werkt niet. Controleer hem bij Instellingen."
+  : e && e.code === "quota" ? "De gratis limiet is even op. Probeer het later opnieuw."
+  : "Dat lukte niet. Controleer de internetverbinding en probeer opnieuw.";
+
+
+/* ========== audio: half-duplex so Els never hears herself ========== */
+let ctx = null, micStream = null, micNode = null, analyser = null, outGain = null, levelLoop = 0;
+let playHead = 0, playing = [], muted = false, dropAudio = false;
+const MIC_TAIL = 0.5;
+const WORKLET = `class ElsRec extends AudioWorkletProcessor{constructor(){super();this.r=sampleRate/16000;this.a=0;this.s=0;this.n=0;this.b=[]}
+process(i){const c=i[0]&&i[0][0];if(!c)return true;for(let k=0;k<c.length;k++){this.s+=c[k];this.n++;this.a+=1;if(this.a>=this.r){this.a-=this.r;this.b.push(this.s/this.n);this.s=0;this.n=0}}
+if(this.b.length>=1600){const o=new Int16Array(this.b.length);for(let k=0;k<this.b.length;k++){const v=Math.max(-1,Math.min(1,this.b[k]));o[k]=v<0?v*32768:v*32767}this.port.postMessage(o.buffer,[o.buffer]);this.b=[]}return true}}
+registerProcessor("els-rec",ElsRec);`;
+function b64(buf){ const u = new Uint8Array(buf); let s = ""; for(let i=0;i<u.length;i+=0x8000) s += String.fromCharCode.apply(null, u.subarray(i,i+0x8000)); return btoa(s); }
+function elsAudible(){ return ctx && ctx.currentTime < playHead + MIC_TAIL; }
+async function startAudio(){
+  try{ if(navigator.audioSession) navigator.audioSession.type = "play-and-record"; }catch(e){}
+  const AC = window.AudioContext || window.webkitAudioContext;
+  ctx = new AC(); await ctx.resume();
+  analyser = ctx.createAnalyser(); analyser.fftSize = 1024;
+  outGain = ctx.createGain(); outGain.connect(analyser); analyser.connect(ctx.destination);
+  micStream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}});
+  await ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([WORKLET],{type:"application/javascript"})));
+  const src = ctx.createMediaStreamSource(micStream);
+  micNode = new AudioWorkletNode(ctx,"els-rec");
+  const sink = ctx.createGain(); sink.gain.value = 0;
+  src.connect(micNode); micNode.connect(sink); sink.connect(ctx.destination);
+  micNode.port.onmessage = e => {
+    if(muted || !ready || !ws || ws.readyState !== 1 || elsAudible()) return;
+    ws.send(JSON.stringify({realtimeInput:{audio:{data:b64(e.data),mimeType:"audio/pcm;rate=16000"}}}));
+  };
+  const data = new Float32Array(analyser.fftSize);
+  const loop = () => {
+    analyser.getFloatTimeDomainData(data);
+    let s = 0; for(let i=0;i<data.length;i++) s += data[i]*data[i];
+    level = Math.min(1, Math.max(0,(Math.sqrt(s/data.length)-0.01)*7));
+    if(inCall && ready){
+      if(elsAudible()){ if(mode !== "speaking") setState("speaking","Els praat · tik op haar om te onderbreken"); }
+      else if(mode !== "listening") setState("listening", muted ? "Je micro staat uit" : "Els luistert…");
+    }
+    levelLoop = requestAnimationFrame(loop);
+  };
+  loop();
+}
+function playPCM(data){
+  const bin = atob(data); const n = bin.length >> 1; const f = new Float32Array(n);
+  for(let i=0;i<n;i++){ let v = bin.charCodeAt(2*i) | (bin.charCodeAt(2*i+1) << 8); if(v >= 32768) v -= 65536; f[i] = v/32768; }
+  const buf = ctx.createBuffer(1,n,24000); buf.copyToChannel(f,0);
+  const src = ctx.createBufferSource(); src.buffer = buf; src.connect(outGain);
+  const t = Math.max(ctx.currentTime + 0.05, playHead); src.start(t); playHead = t + buf.duration;
+  playing.push(src); src.onended = () => { playing = playing.filter(x => x !== src); };
+}
+function stopPlayback(){ for(const s of playing){ try{ s.stop(); }catch(e){} } playing = []; if(ctx) playHead = ctx.currentTime - MIC_TAIL; }
+function stopAudio(){
+  cancelAnimationFrame(levelLoop); level = 0; stopPlayback();
+  try{ micStream && micStream.getTracks().forEach(t => t.stop()); }catch(e){}
+  try{ ctx && ctx.close(); }catch(e){}
+  ctx = null; micStream = null; micNode = null;
+}
+
+/* ========== live call ========== */
+let ws = null, ready = false, inCall = false, callStart = 0, timer = 0, phase = 0, stoppedByUser = false;
+let elsText = "", transcript = [], annBuf = "", lessonContext = null, modelIdx = 0, useVoice = true, retries = 0, resumeHandle = null;
+let subtitles = store.get("els:subs", true), wakeLock = null;
+
+function systemText(){
+  const L = LANGS[lang], V = VOICES[store.get("els:voice2","gb-warm")];
+  const due = dueItems(4);
+  const facts = store.get("els:facts",[]);
+  const now = new Date();
+  const when = now.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"}) + ", " + (now.getHours()<12?"morning":now.getHours()<18?"afternoon":"evening");
+  const pace = store.get("els:pace","normal") === "calm" ? "Speak a little slower than usual and leave small pauses." : "Speak at a natural, relaxed pace.";
+  return `${ELS}
+
+VOICE: ${lang === "en" ? `Speak English with a natural, clear ${V.accent} accent.` : `Speak ${L.name} with a natural native accent.`} ${pace}
+
+ABOUT ANN (private background: use naturally over time, one thing at a time; never list it or say how you know it)
+${PROFILE}
+
+PRACTICE LANGUAGE: ${L.name}
+ANN'S LEVEL IN ${L.name.toUpperCase()}: ${L.level}
+TODAY: ${when}
+${facts.length ? "THINGS SHE TOLD YOU BEFORE:\n- " + facts.slice(-12).join("\n- ") : ""}
+${due.length ? "BRING THESE BACK TODAY (things she got wrong or learned before). Weave them into the conversation naturally, invite her to use them, and praise her when she does:\n- " + due.map(i => i.type === "word" ? `the word "${i.a}" (${i.b})` : `"${i.a}" should be "${i.b}"`).join("\n- ") : ""}
+${lessonContext ? `TODAY'S MINI LESSON, which she just did: "${lessonContext.title}". ${lessonContext.summary||""} Help her use it out loud; you can open with: ${lessonContext.talk}` : ""}
+
+SHAPE OF THIS ${SESSION_MIN}-MINUTE SESSION
+1. Warm welcome and a real conversation about her day and her life.
+2. Middle: dig into one topic properly, bring back the items above, teach one or two useful expressions.
+3. End: warm goodbye, name one thing she did well and one thing to practise next time.
+The app will tell you when to move on.`;
+}
+
+async function keepAwake(on){
+  try{
+    if(on && "wakeLock" in navigator){ wakeLock = await navigator.wakeLock.request("screen"); }
+    else if(wakeLock){ await wakeLock.release(); wakeLock = null; }
+  }catch(e){}
+}
+
+function connect(){
+  ready = false;
+  ws = new WebSocket(WS_URL + encodeURIComponent(apiKey()));
+  let setupOk = false;
+  ws.onopen = () => {
+    const gen = {responseModalities:["AUDIO"], temperature:0.9};
+    if(useVoice) gen.speechConfig = {voiceConfig:{prebuiltVoiceConfig:{voiceName:VOICES[store.get("els:voice2","gb-warm")].voice}}};
+    const codes = lang === "nl" ? ["nl-BE"] : [LANGS[lang].code, "nl-BE"];
+    const setup = {
+      model:"models/" + LIVE_MODELS[modelIdx],
+      generationConfig: gen,
+      systemInstruction:{parts:[{text:systemText()}]},
+      inputAudioTranscription:{languageCodes:codes},
+      outputAudioTranscription:{},
+      realtimeInputConfig:{automaticActivityDetection:{startOfSpeechSensitivity:"START_SENSITIVITY_LOW",endOfSpeechSensitivity:"END_SENSITIVITY_LOW",prefixPaddingMs:300,silenceDurationMs:1100}},
+      contextWindowCompression:{slidingWindow:{}},
+      sessionResumption: resumeHandle ? {handle:resumeHandle} : {}
+    };
+    ws.send(JSON.stringify({setup}));
+  };
+  ws.onmessage = async ev => {
+    let msg; try{ msg = JSON.parse(typeof ev.data === "string" ? ev.data : await ev.data.text()); }catch(e){ return; }
+    if(msg.setupComplete !== undefined){
+      setupOk = true; ready = true; retries = 0;
+      const h = new Date().getHours();
+      if(transcript.length) sendText("[App] The connection dropped for a moment and is back. Continue the conversation naturally, without mentioning it.");
+      else sendText(`[App] Ann just opened the app to practise ${LANGS[lang].name}. It is ${h<12?"morning":h<18?"afternoon":"evening"}. Greet her warmly by name, like a friend who is happy to hear her, and start a light, personal conversation.`);
+      return;
+    }
+    if(msg.sessionResumptionUpdate && msg.sessionResumptionUpdate.newHandle) resumeHandle = msg.sessionResumptionUpdate.newHandle;
+    if(msg.goAway){ try{ ws.close(); }catch(e){} return; }
+    const sc = msg.serverContent; if(!sc) return;
+    if(sc.interrupted) stopPlayback();
+    if(sc.modelTurn?.parts && !dropAudio){ for(const p of sc.modelTurn.parts) if(p.inlineData?.data && ctx) playPCM(p.inlineData.data); }
+    if(sc.inputTranscription?.text) annBuf += sc.inputTranscription.text;
+    if(sc.outputTranscription?.text && !dropAudio){ elsText += sc.outputTranscription.text; showCaption(elsText); }
+    if(sc.turnComplete) finishTurn();
+  };
+  ws.onclose = ev => {
+    ready = false;
+    if(!inCall) return;
+    if(!setupOk){
+      const reason = (ev.reason || "").toLowerCase();
+      if(reason.includes("api key") || reason.includes("api_key") || (reason.includes("permission") && reason.includes("denied"))) return endCall("De sleutel werkt niet. Controleer hem bij Instellingen.", true);
+      if(reason.includes("quota") || reason.includes("exhausted")) return endCall("De gratis limiet voor vandaag is op. Morgen kan Els weer praten.", true);
+      if(modelIdx < LIVE_MODELS.length-1){ modelIdx++; return connect(); }
+      if(useVoice){ useVoice = false; modelIdx = 0; return connect(); }
+      return endCall("Els is nu niet bereikbaar. Controleer de internetverbinding en probeer opnieuw." + (ev.reason ? " (" + ev.reason + ")" : ""), true);
+    }
+    if(!stoppedByUser && retries < 2){ retries++; setState("connecting","Even opnieuw verbinden…"); setTimeout(() => { if(inCall) connect(); }, 800); return; }
+    endCall();
+  };
+  ws.onerror = () => {};
+}
+function sendText(t){ if(ws && ws.readyState === 1) ws.send(JSON.stringify({realtimeInput:{text:t}})); }
+function showCaption(t){ const s = t.trim(); $("caption").textContent = s.length > 170 ? "…" + s.slice(-170) : s; }
+function finishTurn(){
+  const said = annBuf.trim(); const heard = elsText.trim();
+  if(said) transcript.push({who:"ann", text:said});
+  if(heard) transcript.push({who:"els", text:heard});
+  annBuf = ""; elsText = ""; dropAudio = false;
+  const m = (Date.now()-callStart)/60000;
+  if(phase === 0 && m >= 2.5){ phase = 1; sendText("[App] Warm-up done. Now go deeper into one topic she cares about, and start weaving in the items you were asked to bring back."); }
+  else if(phase === 1 && m >= SESSION_MIN - 2){ phase = 2; sendText("[App] Two minutes left. Start steering towards a natural end."); }
+  else if(phase === 2 && m >= SESSION_MIN){ phase = 3; sendText("[App] Time is up. After her next answer, say goodbye warmly: name one thing she did well today and one thing to practise next time."); }
+}
+async function startCall(){
+  if(inCall) return;
+  if(!apiKey()) return openSettings(true);
+  inCall = true; stoppedByUser = false; phase = 0; modelIdx = 0; useVoice = true; retries = 0; resumeHandle = null;
+  transcript = []; annBuf = ""; elsText = ""; dropAudio = false;
+  app.classList.add("incall");
+  $("home").classList.add("hidden"); $("langs").classList.add("hidden"); $("gear").classList.add("hidden");
+  $("callbar").classList.remove("hidden"); $("clock").classList.remove("hidden");
+  $("caption").textContent = ""; $("caption").classList.toggle("hidden", !subtitles);
+  setState("connecting","Els wordt gebeld…"); setRing(0);
+  try{ await startAudio(); }
+  catch(e){ return endCall("Els kan je niet horen: geef de app toegang tot de microfoon en probeer opnieuw.", true); }
+  keepAwake(true);
+  callStart = Date.now(); tick(); timer = setInterval(tick, 3000);
+  connect();
+}
+function tick(){
+  const m = (Date.now()-callStart)/60000;
+  $("clock").textContent = Math.min(99, Math.floor(m)) + " / " + SESSION_MIN + " min";
+  setRing(m/SESSION_MIN);
+  if(m >= SESSION_MIN + 3) endCall();
+}
+function endCall(message, isErr){
+  const wasIn = inCall, mins = wasIn ? (Date.now()-callStart)/60000 : 0;
+  inCall = false; ready = false; stoppedByUser = true;
+  try{ ws && ws.close(); }catch(e){} ws = null;
+  stopAudio(); clearInterval(timer); keepAwake(false); setRing(0);
+  app.classList.remove("incall"); setState(null,"");
+  $("callbar").classList.add("hidden"); $("clock").classList.add("hidden"); $("caption").classList.add("hidden");
+  $("langs").classList.remove("hidden"); $("gear").classList.remove("hidden");
+  muted = false; $("muteBtn").setAttribute("aria-pressed","false"); $("muteCap").textContent = "Micro aan";
+  lessonContext = null;
+  if(wasIn && mins > 0.6){ logSession(mins); renderHome(); openRecap(); }
+  else renderHome(message, isErr);
+}
+
+/* ========== recap after the call ========== */
+async function openRecap(){
+  const lines = transcript.filter(t => t.text).slice(-40).map(t => (t.who === "ann" ? "Ann: " : "Els: ") + t.text).join("\n");
+  if(lines.length < 80) return;
+  const card = $("card"); sheetOpen();
+  card.innerHTML = ""; card.append(cardTop("Terugblik"));
+  card.append(el("p","hint","Els kijkt even terug op jullie gesprek…"));
+  const L = LANGS[lang];
+  const prompt = `This is a speech transcript of a ${L.name} practice conversation between Ann (learner, level: ${L.level}) and Els (her coach). Transcription errors are possible; ignore them.
+${lines}
+
+Write a short, warm review for Ann in Dutch (her mother tongue), except the example sentences which stay in ${L.name}.
+Reply with only JSON: {"praise":"one or two sentences in Dutch about what went well, concrete","fixes":[{"said":"what Ann said wrong (in ${L.name})","better":"the correct version","why":"very short reason in Dutch"}],"words":[{"word":"useful word or expression from the conversation, in ${L.name}","meaning":"short meaning in Dutch"}],"next":"one short sentence in Dutch: what to practise next time"}
+At most 3 fixes and 3 words. Only real, clear mistakes.`;
+  let r;
+  try{ r = await textJSON(prompt, TEXT_SMART); }
+  catch(e){ card.innerHTML = ""; card.append(cardTop("Terugblik"), el("p","note err", errText(e))); return; }
+  (r.fixes||[]).forEach(f => addItem("fix", f.said, f.better, f.why));
+  (r.words||[]).forEach(w => addItem("word", w.word, w.meaning));
+  card.innerHTML = ""; card.append(cardTop("Terugblik"));
+  if(r.praise) card.append(el("p",null,r.praise));
+  if((r.fixes||[]).length){
+    card.append(el("h3",null,"Dit kan nog beter"));
+    r.fixes.forEach(f => { const b = el("div","block fixline");
+      b.append(el("s",null,f.said), document.createTextNode("  →  "), el("b",null,f.better), el("div","n",f.why||""));
+      card.append(b); });
+  }
+  if((r.words||[]).length){
+    card.append(el("h3",null,"Nieuwe woorden"));
+    r.words.forEach(w => { const b = el("div","block"); b.append(el("div","t",w.word), el("div","n",w.meaning)); card.append(b); });
+  }
+  if(r.next){ card.append(el("h3",null,"Volgende keer")); card.append(el("p",null,r.next)); }
+  card.append(el("p","hint","Els brengt deze punten vanzelf terug in jullie volgende gesprekken."));
+  const acts = el("div","actions"); const ok = el("button","big","Klaar"); ok.onclick = () => { sheetClose(); renderHome(); }; acts.append(ok); card.append(acts);
+}
+
+/* ========== daily lesson ========== */
+const KINDS = ["words","grammar","reading","grammar","expressions","reading","words"];
+const KIND_NL = {grammar:"Grammatica", words:"Woorden", reading:"Lezen", expressions:"Uitdrukkingen"};
+function lessonPrompt(kind){
+  const L = LANGS[lang];
+  const due = dueItems(6);
+  const themes = ["the sea and water","her garden and plants","yoga and healthy food","teaching and school life","family life with adult children","cycling through the city","interior design and a cosy home","a good series on Netflix","discovering beautiful new places","quality time with friends","the gym and staying fit","nature walks"];
+  const theme = themes[new Date().getDate() % themes.length];
+  return `Create today's short ${L.name} lesson for Ann, a 55-year-old Flemish teacher (Dutch mother tongue). Level: ${L.level}
+Type: ${kind}. Theme for the examples: ${theme}. About 3 minutes, friendly and practical for speaking, written entirely in simple ${L.name}, except "note" fields which are in Dutch.
+${due.length ? "Where it fits, reuse: " + due.map(i => `"${i.a}" -> "${i.b}"`).join("; ") : ""}
+${kind === "reading" ? "Include a short reading text of 80-110 words; the quiz tests understanding of it." : "Leave reading as an empty string."}
+Reply with only JSON: {"title":"short title","intro":"2-3 sentences in ${L.name}","reading":"","examples":[{"text":"example sentence in ${L.name}","note":"short note in Dutch"}],"quiz":[{"q":"question","options":["a","b","c"],"answer":0,"why":"short explanation"}],"say":"one sentence in ${L.name} for Ann to say out loud","talk":"one friendly question Els can ask to practise this","summary":"one sentence summary in English"}
+Exactly 3 examples and 3 quiz questions with exactly 3 options each.`;
+}
+async function openLesson(){
+  if(!apiKey()) return openSettings(true);
+  const card = $("card"); sheetOpen();
+  const key = "els:lesson:" + dayKey() + ":" + lang;
+  let lesson = store.get(key, null);
+  if(lesson) return renderLesson(lesson);
+  card.innerHTML = ""; card.append(cardTop("Les van vandaag"), el("p","hint","Els maakt je les van vandaag klaar…"));
+  try{
+    const kind = KINDS[new Date().getDay()];
+    lesson = await textJSON(lessonPrompt(kind), TEXT_SMART);
+    if(!lesson || !lesson.title || !Array.isArray(lesson.quiz)) throw {code:"parse"};
+    lesson.kind = kind; store.set(key, lesson);
+    (lesson.examples||[]).forEach(() => {});
+    renderLesson(lesson);
+  }catch(e){ card.innerHTML = ""; card.append(cardTop("Les van vandaag"), el("p","note err", errText(e))); }
+}
+function renderLesson(l){
+  const card = $("card"); card.innerHTML = "";
+  card.append(cardTop(l.title), el("p","hint",(KIND_NL[l.kind]||"Les") + " · " + LANGS[lang].ui), el("p",null,l.intro));
+  if(l.reading) card.append(el("div","reading",l.reading));
+  (l.examples||[]).forEach(x => { const b = el("div","block"); b.append(el("div","t",x.text), el("div","n",x.note||"")); card.append(b); });
+  if(l.say){ card.append(el("h3",null,"Zeg het hardop")); const b = el("div","block"); b.append(el("div","t",l.say)); card.append(b); }
+  if((l.quiz||[]).length) card.append(el("h3",null,"Even testen"));
+  (l.quiz||[]).forEach((q,qi) => {
+    card.append(el("div","q",(qi+1)+". "+q.q));
+    const why = el("p","why2",""); const btns = [];
+    (q.options||[]).forEach((o,oi) => { const b = el("button","opt",o); btns.push(b);
+      b.onclick = () => { btns.forEach((bb,i) => { bb.disabled = true; if(i === q.answer) bb.classList.add("right"); });
+        if(oi !== q.answer) b.classList.add("wrong");
+        why.textContent = (oi === q.answer ? "Juist! " : "") + (q.why||""); };
+      card.append(b); });
+    card.append(why);
+  });
+  const acts = el("div","actions"); const go = el("button","big","Oefen dit met Els");
+  go.onclick = () => { sheetClose(); lessonContext = l; startCall(); };
+  acts.append(go); card.append(acts);
+}
+
+/* ========== word bank & review ========== */
+function openWords(){
+  const card = $("card"); sheetOpen(); card.innerHTML = "";
+  card.append(cardTop("Mijn woorden"));
+  const mine = ITEMS().filter(i => i.lang === lang);
+  const words = mine.filter(i => i.type === "word"), fixes = mine.filter(i => i.type === "fix");
+  const due = mine.filter(i => i.due <= todayNum());
+  if(!mine.length){ card.append(el("p","hint","Hier verschijnen de woorden en zinnen uit jullie gesprekken. Praat eerst even met Els.")); return; }
+  card.append(el("p","hint", due.length ? due.length + " punten zijn vandaag aan de beurt. Els brengt ze vanzelf terug in jullie gesprek." : "Alles is voor nu herhaald. Mooi werk."));
+  if(due.length){
+    const acts = el("div","actions"); const q = el("button","big","Snel overhoren (" + Math.min(6,due.length) + ")");
+    q.onclick = () => quiz(due.slice(0,6)); acts.append(q); card.append(acts);
+  }
+  if(words.length){ card.append(el("h3",null,"Woorden en uitdrukkingen"));
+    words.slice().reverse().forEach(w => { const b = el("div","block"); b.append(el("div","t",w.a), el("div","n",w.b)); card.append(b); }); }
+  if(fixes.length){ card.append(el("h3",null,"Zinnen om scherp te houden"));
+    fixes.slice().reverse().forEach(f => { const b = el("div","block fixline");
+      b.append(el("s",null,f.a), document.createTextNode("  →  "), el("b",null,f.b), el("div","n",f.why||"")); card.append(b); }); }
+}
+function quiz(items){
+  const card = $("card"); let i = 0, good = 0;
+  const step = () => {
+    card.innerHTML = ""; card.append(cardTop("Overhoren"));
+    if(i >= items.length){
+      card.append(el("p",null, good + " van de " + items.length + " goed."), el("p","hint","Wat je nog niet vast hebt, komt binnenkort terug."));
+      const a = el("div","actions"); const b = el("button","big","Klaar"); b.onclick = () => { sheetClose(); renderHome(); }; a.append(b); card.append(a); return;
+    }
+    const it = items[i];
+    card.append(el("p","hint",(i+1) + " van " + items.length));
+    card.append(el("div","q", it.type === "word" ? "Wat betekent dit?" : "Hoe zeg je dit goed?"));
+    const b = el("div","block"); b.append(el("div","t", it.a)); card.append(b);
+    const reveal = el("div","block hidden"); reveal.append(el("div","t", it.b), el("div","n", it.why||"")); card.append(reveal);
+    const acts = el("div","actions");
+    const show = el("button","big","Toon antwoord");
+    const yes = el("button","chip","Die wist ik"), no = el("button","chip","Nog niet");
+    const pair = el("div","row"); pair.append(yes,no); pair.classList.add("hidden");
+    show.onclick = () => { reveal.classList.remove("hidden"); show.classList.add("hidden"); pair.classList.remove("hidden"); };
+    yes.onclick = () => { reviewed(it,true); good++; i++; step(); };
+    no.onclick = () => { reviewed(it,false); i++; step(); };
+    acts.append(show,pair); card.append(acts);
+  };
+  step();
+}
+
+/* ========== progress ========== */
+function openProgress(){
+  const card = $("card"); sheetOpen(); card.innerHTML = "";
+  card.append(cardTop("Voortgang"));
+  const log = store.get("els:log",{});
+  const days = []; const d = new Date();
+  for(let i = 6; i >= 0; i--){ const dd = new Date(d); dd.setDate(d.getDate()-i); days.push({k:dayKey(dd), lab:["zo","ma","di","wo","do","vr","za"][dd.getDay()], min:(log[dayKey(dd)]?.min)||0}); }
+  const max = Math.max(10, ...days.map(x => x.min));
+  const bars = el("div","bars"); days.forEach(x => { const b = el("div", x.min ? "on" : ""); b.style.height = Math.max(4, (x.min/max)*90) + "px"; b.title = x.min + " min"; bars.append(b); });
+  const labs = el("div","barlab"); days.forEach(x => labs.append(el("span",null,x.lab)));
+  card.append(el("h3",null,"Deze week"), bars, labs);
+  const mine = ITEMS().filter(i => i.lang === lang);
+  const st = el("div","stats");
+  [[streak(),"dagen op rij"],[Math.round(totalMin()),"minuten totaal"],[mine.filter(i=>i.type==="word").length,"woorden"],[mine.filter(i=>i.reps>=3).length,"vast in je hoofd"]]
+    .forEach(([v,l]) => { const s = el("div","stat"); s.append(el("b",null,String(v)), el("span",null,l)); st.append(s); });
+  card.append(el("h3",null,"In het kort"), st);
+  const facts = store.get("els:facts",[]);
+  if(facts.length){ card.append(el("h3",null,"Wat Els over je onthouden heeft"));
+    const wrap = el("div"); facts.slice(-14).forEach(f => wrap.append(el("span","pill",f))); card.append(wrap); }
+}
+
+/* ========== settings ========== */
+function openSettings(firstRun){
+  const card = $("card"); card.innerHTML = ""; sheetOpen();
+  card.append(cardTop(firstRun ? "Eenmalig instellen" : "Instellingen", !firstRun || !!apiKey()));
+  card.append(el("label",null,"Stem van Els"));
+  const sel = el("select");
+  const g1 = document.createElement("optgroup"); g1.label = "Brits Engels";
+  const g2 = document.createElement("optgroup"); g2.label = "Amerikaans Engels";
+  for(const [k,v] of Object.entries(VOICES)){ const o = el("option",null,v.label); o.value = k; (k.startsWith("gb")?g1:g2).append(o); }
+  sel.append(g1,g2); sel.value = store.get("els:voice2","gb-warm"); card.append(sel);
+  card.append(el("p","hint","Het accent geldt voor het Engels."));
+  card.append(el("label",null,"Tempo"));
+  const pace = el("select"); [["normal","Gewoon tempo"],["calm","Rustig, met pauzes"]].forEach(([v,t]) => { const o = el("option",null,t); o.value = v; pace.append(o); });
+  pace.value = store.get("els:pace","normal"); card.append(pace);
+  const subRow = el("label","check"); const sub = document.createElement("input"); sub.type = "checkbox"; sub.checked = subtitles;
+  subRow.append(sub, document.createTextNode("Toon wat Els zegt als tekst")); card.append(subRow);
+  card.append(el("label",null,"Sleutel van Google"));
+  const hint = el("p","hint"); hint.append("Eenmalig plakken. Gratis via ");
+  const a = el("a",null,"aistudio.google.com/apikey"); a.href = "https://aistudio.google.com/apikey"; a.target = "_blank"; a.rel = "noopener";
+  hint.append(a, "."); card.append(hint);
+  const k = el("textarea"); k.rows = 2; k.value = apiKey(); k.autocapitalize = "off"; k.spellcheck = false; card.append(k);
+  const err = el("p","note err",""); card.append(err);
+  const acts = el("div","actions"); const save = el("button","big","Bewaren");
+  save.onclick = () => {
+    const key = k.value.trim().replace(/\s+/g,"");
+    if(!key){ err.textContent = "Plak eerst de sleutel."; return; }
+    store.set("els:key",key); store.set("els:voice2",sel.value); store.set("els:pace",pace.value);
+    subtitles = sub.checked; store.set("els:subs",subtitles);
+    sheetClose(); renderHome();
+  };
+  acts.append(save);
+  if(!firstRun){
+    const reset = el("button","chip","Els alles laten vergeten");
+    reset.onclick = () => { if(confirm("Wil je dat Els alles vergeet: jullie gesprekken, je woorden en je voortgang?")){ ["els:facts","els:items","els:log"].forEach(x => { try{ localStorage.removeItem(x); }catch(e){} }); reset.textContent = "Vergeten"; reset.disabled = true; renderHome(); } };
+    acts.append(reset);
+  }
+  card.append(acts);
+}
+
+/* ========== sheet helpers ========== */
+function sheetOpen(){ $("sheet").classList.add("show"); }
+function sheetClose(){ $("sheet").classList.remove("show"); }
+function cardTop(title, withClose){
+  const h = el("div","cardtop"); h.append(el("h2",null,title));
+  if(withClose !== false){ const b = el("button","close","×"); b.setAttribute("aria-label","Sluiten"); b.onclick = sheetClose; h.append(b); }
+  return h;
+}
+
+/* ========== home ========== */
+function renderLangs(){
+  const box = $("langs"); box.innerHTML = "";
+  for(const [code,v] of Object.entries(LANGS)){
+    const b = el("button","lang",v.label); b.setAttribute("aria-pressed", code === lang);
+    b.onclick = () => { lang = code; store.set("els:lang",code); renderLangs(); renderHome(); };
+    box.append(b);
+  }
+}
+const ICON = {book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5c3-1.5 6-1.5 9 0v14c-3-1.5-6-1.5-9 0z"/><path d="M21 5c-3-1.5-6-1.5-9 0v14c3-1.5 6-1.5 9 0z"/></svg>',
+  star:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6L3.4 9.4l6-.8z"/></svg>',
+  chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>'};
+function chip(label, icon, badge, fn){
+  const b = el("button","chip"); const s = document.createElement("span"); s.innerHTML = icon; b.append(s.firstChild, el("span",null,label));
+  if(badge) b.append(el("span","dot",String(badge)));
+  b.onclick = fn; return b;
+}
+function renderHome(message, isErr){
+  const w = $("home"); w.innerHTML = ""; w.classList.remove("hidden");
+  const h = new Date().getHours();
+  if(message) w.append(el("p","note"+(isErr?" err":""), message));
+  else{
+    w.append(el("h1","hello", h < 12 ? "Goedemorgen, Ann" : h < 18 ? "Dag Ann" : "Goedenavond, Ann"));
+    const done = (store.get("els:log",{})[dayKey()]?.min)||0;
+    w.append(el("p","sub", done >= 5 ? "Je hebt vandaag al " + Math.round(done) + " minuten geoefend. Nog een babbel?" : "Els heeft koffie gezet en zin in een babbel in het " + LANGS[lang].ui + "."));
+  }
+  const start = el("button","big","Praat met Els"); start.onclick = startCall; w.append(start);
+  const row = el("div","row");
+  row.append(chip("Les van vandaag", ICON.book, 0, openLesson));
+  row.append(chip("Mijn woorden", ICON.star, dueItems(99).length, openWords));
+  row.append(chip("Voortgang", ICON.chart, 0, openProgress));
+  w.append(row);
+  const s = streak(); if(s > 1) w.append(el("p","sub", s + " dagen op rij. Mooi volgehouden."));
+}
+
+/* ========== wiring ========== */
+$("stopBtn").onclick = () => endCall();
+$("muteBtn").onclick = () => { muted = !muted; $("muteBtn").setAttribute("aria-pressed",muted); $("muteCap").textContent = muted ? "Micro uit" : "Micro aan"; };
+$("subBtn").onclick = () => { subtitles = !subtitles; store.set("els:subs",subtitles); $("subBtn").setAttribute("aria-pressed",subtitles); $("caption").classList.toggle("hidden",!subtitles); };
+$("subBtn").setAttribute("aria-pressed", subtitles);
+$("portrait").onclick = () => { if(!inCall) return startCall(); if(elsAudible()){ dropAudio = true; stopPlayback(); setState("listening","Els luistert…"); } };
+$("gear").onclick = () => openSettings(false);
+$("sheet").addEventListener("click", e => { if(e.target.id === "sheet" && apiKey()) sheetClose(); });
+document.addEventListener("visibilitychange", () => {
+  if(document.hidden && inCall) endCall("Het gesprek stopte omdat de app op de achtergrond ging.");
+  else if(!document.hidden && wakeLock === null && inCall) keepAwake(true);
+});
+try{
+  renderLangs(); renderHome();
+  if(!apiKey()) openSettings(true);
+}catch(e){
+  const c = $("crash"); if(c){ c.style.display = "block"; $("crashmsg").textContent = (e && e.message) || "onbekende fout"; }
+  const w = $("home");
+  if(w && !w.innerHTML){ const b = el("button","big","Praat met Els"); b.onclick = startCall; w.append(b); }
+}
+if("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>
