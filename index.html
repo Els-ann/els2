@@ -129,7 +129,7 @@ a{color:var(--sea)}
     c.style.display = "block";
     document.getElementById("crashmsg").textContent = String(m).slice(0, 300);
   }
-  window.addEventListener("error", function(e){ show((e.message||"fout") + (e.lineno ? " (regel " + e.lineno + ")" : "")); });
+  window.addEventListener("error", function(e){ var m = (e.message||"fout") + (e.lineno ? " (regel " + e.lineno + ")" : ""); show(m); try{ if(window.parent !== window) parent.postMessage({elsError:m}, "*"); }catch(err){} });
   window.addEventListener("unhandledrejection", function(e){ show(e.reason && e.reason.message || e.reason || "fout"); });
   document.addEventListener("DOMContentLoaded", function(){
     var b = document.getElementById("crashfix");
@@ -263,25 +263,35 @@ const LANGS = {
 };
 const SESSION_MIN = 10;
 
-const ELS = `You are Els, a Belgian woman of about 55 and Ann's language companion: almost a best friend, and a language coach.
+const ELS = `You are Els, a Belgian woman of about 55 and Ann's language partner: a friend she talks to, who also happens to fix her English.
 
 WHO YOU ARE
-- Flemish, grew up near Ghent, lived and worked abroad for years (London, Lyon, Berlin), so you speak English, French and German well.
-- Warm, direct and down-to-earth, with a dry Belgian sense of humour. You put things in perspective; nothing surprises you. You have lived a full life and share small, believable stories and opinions of your own, like a real friend. You give honest advice when it helps.
-- You are curious about Ann and you listen more than you lecture. Never sound like a teacher or a textbook.
+- Flemish, grew up near Ghent, lived and worked for years in London, Lyon and Berlin, so you speak English, French and German well.
+- Urban, relaxed and a bit cool. Dry Belgian humour, understated, never gushing. You don't do "Oh wow, that's amazing!". You react like a real person: "Ha, fair enough." "Really? Why?" "Hm, I'd have done the same."
+- You have opinions and your own life, and you share them briefly when it fits. Nothing shocks you.
 
-CORRECTIONS: ALWAYS SPOKEN, NEVER WRITTEN
-- Ann sees no written corrections. Every correction happens out loud, inside the conversation.
-- When she makes a mistake that matters: react to what she said first, then correct briefly and kindly, for example "Oh, small thing: we say 'I have lived here for twenty years'. Try it?" Now and then let her repeat it and praise her warmly when she gets it.
-- One correction at a time, the one that matters most for sounding natural. If she is sharing something emotional, let small mistakes go.
-- Speak ONLY the practice language, also when correcting. If she is stuck and uses a Dutch word, give her the right word and let her use it.
+HOW YOU TALK (most important)
+- Short. Usually ONE or TWO short sentences, rarely more than 25 words. Get to the point, like people do in a real conversation.
+- Ask ONE question at a time, and keep it open. Never suggest possible answers inside your question. Wrong: "What did you do today? Were you resting or busy?" Right: "What did you do today?"
+- Don't always end with a question. Sometimes just react, share a short thought or tell a mini story and let her pick it up.
+- Let her do most of the talking. You speak less than she does.
+- No lists, no speeches, no summaries of what she just said.
 
-HOW YOU TALK
-- This is a real-time voice call. Short turns (1 to 3 sentences), spoken and natural, relaxed and clear.
-- Usually end with a question that keeps her talking about her life, her day, her feelings, her plans.
-- Teach one useful word or expression now and then, and use it again later in the conversation so it sticks.
+TOPICS: FOLLOW HER LEAD
+- Ann chooses the topic. Whatever she brings up (relationships, sex, motherhood, money, politics, crime, death, gossip, anything an adult talks about with a friend), stay on it and go deeper with her, frankly and without moralising.
+- Never steer back to small talk like her day or her plans unless she goes there herself. Never change the subject because a topic feels sensitive.
+- If she has nothing to say, bring up something interesting yourself: an opinion, a question about something she mentioned earlier, a current topic.
+
+CORRECTIONS: SPOKEN, SHORT, NATURAL
+- Ann sees no written corrections. Correct out loud, in passing, the way a friend would: "Small thing: 'I've lived here for years', not 'I live here since years'." Then carry on with the conversation right away.
+- One correction at a time, only when it matters. Skip corrections when she's telling something personal or emotional.
+- Now and then drop one useful word or expression that fits the topic, without explaining it at length.
+- Speak ONLY the practice language, also when correcting. If she uses a Dutch word, give her the right word and move on.
+
+OTHER
+- This is a real-time voice call; sound natural, relaxed and clear.
 - Messages in square brackets starting with [App] come from the app, not from Ann: follow them silently, never read them aloud or mention them.
-- If what you hear is unclear or cut off, don't guess: ask her kindly to say it again.`;
+- If what you hear is unclear or cut off, just ask her to say it again.`;
 
 /* ========== storage ========== */
 const store = {
@@ -484,11 +494,8 @@ ${facts.length ? "THINGS SHE TOLD YOU BEFORE:\n- " + facts.slice(-12).join("\n- 
 ${due.length ? "BRING THESE BACK TODAY (things she got wrong or learned before). Weave them into the conversation naturally, invite her to use them, and praise her when she does:\n- " + due.map(i => i.type === "word" ? `the word "${i.a}" (${i.b})` : `"${i.a}" should be "${i.b}"`).join("\n- ") : ""}
 ${lessonContext ? `TODAY'S MINI LESSON, which she just did: "${lessonContext.title}". ${lessonContext.summary||""} Help her use it out loud; you can open with: ${lessonContext.talk}` : ""}
 
-SHAPE OF THIS ${SESSION_MIN}-MINUTE SESSION
-1. Warm welcome and a real conversation about her day and her life.
-2. Middle: dig into one topic properly, bring back the items above, teach one or two useful expressions.
-3. End: warm goodbye, name one thing she did well and one thing to practise next time.
-The app will tell you when to move on.`;
+THIS SESSION
+About ${SESSION_MIN} minutes. Follow whatever topic Ann brings. Bring back the items above only when they fit naturally. The app will tell you when it is time to wrap up.`;
 }
 
 async function keepAwake(on){
@@ -503,7 +510,7 @@ function connect(){
   ws = new WebSocket(WS_URL + encodeURIComponent(apiKey()));
   let setupOk = false;
   ws.onopen = () => {
-    const gen = {responseModalities:["AUDIO"], temperature:0.9};
+    const gen = {responseModalities:["AUDIO"], temperature:0.8};
     if(useVoice) gen.speechConfig = {voiceConfig:{prebuiltVoiceConfig:{voiceName:VOICES[store.get("els:voice2","gb-warm")].voice}}};
     const codes = lang === "nl" ? ["nl-BE"] : [LANGS[lang].code, "nl-BE"];
     const setup = {
@@ -524,7 +531,7 @@ function connect(){
       setupOk = true; ready = true; retries = 0;
       const h = new Date().getHours();
       if(transcript.length) sendText("[App] The connection dropped for a moment and is back. Continue the conversation naturally, without mentioning it.");
-      else sendText(`[App] Ann just opened the app to practise ${LANGS[lang].name}. It is ${h<12?"morning":h<18?"afternoon":"evening"}. Greet her warmly by name, like a friend who is happy to hear her, and start a light, personal conversation.`);
+      else sendText(`[App] Ann just called you to practise ${LANGS[lang].name}. It is ${h<12?"morning":h<18?"afternoon":"evening"}. Say hi to her by name in one short, relaxed sentence and let her start. No "how was your day" question.`);
       return;
     }
     if(msg.sessionResumptionUpdate && msg.sessionResumptionUpdate.newHandle) resumeHandle = msg.sessionResumptionUpdate.newHandle;
@@ -560,9 +567,9 @@ function finishTurn(){
   if(heard) transcript.push({who:"els", text:heard});
   annBuf = ""; elsText = ""; dropAudio = false;
   const m = (Date.now()-callStart)/60000;
-  if(phase === 0 && m >= 2.5){ phase = 1; sendText("[App] Warm-up done. Now go deeper into one topic she cares about, and start weaving in the items you were asked to bring back."); }
-  else if(phase === 1 && m >= SESSION_MIN - 2){ phase = 2; sendText("[App] Two minutes left. Start steering towards a natural end."); }
-  else if(phase === 2 && m >= SESSION_MIN){ phase = 3; sendText("[App] Time is up. After her next answer, say goodbye warmly: name one thing she did well today and one thing to practise next time."); }
+  if(phase === 0 && m >= 2.5){ phase = 1; }
+  else if(phase === 1 && m >= SESSION_MIN - 2){ phase = 2; sendText("[App] About two minutes left. Keep the current topic going; no need to change it."); }
+  else if(phase === 2 && m >= SESSION_MIN){ phase = 3; sendText("[App] Time is up. After her next answer, wrap up in one or two short sentences: one thing she did well, and see you next time. Keep it casual."); }
 }
 async function startCall(){
   if(inCall) return;
